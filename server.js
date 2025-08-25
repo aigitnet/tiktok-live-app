@@ -63,7 +63,7 @@ function connectToTikTokLive(username, ws) {
             ws.send(JSON.stringify({
                 type: 'error',
                 data: {
-                    message: `Failed to connect to TikTok user "${username}". Please check the username.`
+                    message: `Failed to connect to TikTok user "${username}". Please check the username. Error: ${err.message}`
                 }
             }));
         });
