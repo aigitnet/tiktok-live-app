@@ -65,7 +65,6 @@
         }
 
         .alert {
-            background-color: #4CAF50;
             color: white;
             padding: 1rem;
             margin-bottom: 0.5rem;
@@ -74,6 +73,12 @@
             animation: fadeIn 0.5s ease-out forwards;
         }
         
+        .alert.follow { background-color: #4CAF50; } /* Green for follow */
+        .alert.share { background-color: #2196F3; } /* Blue for share */
+        .alert.gift { background-color: #FF9800; } /* Orange for gift */
+        .alert.chat { background-color: #9E9E9E; } /* Gray for chat */
+        .alert.error { background-color: #F44336; } /* Red for error */
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -102,7 +107,7 @@
             const username = document.getElementById('tiktok-username').value;
             if (username) {
                 // Connect to the WebSocket server on Render
-                const ws = new WebSocket('wss://tiktok-live-app.onrender.com');
+                const ws = new WebSocket('wss://tiktok-live-app.onrender.com/websocket');
 
                 ws.onopen = () => {
                     console.log('Connected to WebSocket server');
@@ -113,7 +118,7 @@
                 ws.onmessage = event => {
                     const data = JSON.parse(event.data);
                     console.log('Received:', data);
-                    showAlert(data.data.message);
+                    showAlert(data.data.message, data.type);
                 };
 
                 ws.onclose = () => {
@@ -122,16 +127,32 @@
 
                 ws.onerror = error => {
                     console.error('WebSocket error:', error);
-                    showAlert('Connection error. Please try again.');
+                    showAlert('Connection error. Please try again.', 'error');
                 };
             }
         });
 
-        function showAlert(message) {
+        function showAlert(message, type) {
             const container = document.getElementById('alert-container');
             const alert = document.createElement('div');
-            alert.className = 'alert';
-            alert.textContent = message;
+            
+            // Add a class based on the event type for different styling
+            let emoji = '';
+            if (type === 'follow') {
+                emoji = '🎉';
+            } else if (type === 'share') {
+                emoji = '🔗';
+            } else if (type === 'gift') {
+                emoji = '🎁';
+            } else if (type === 'chat') {
+                emoji = '💬';
+            } else if (type === 'error') {
+                emoji = '⚠️';
+            }
+
+            alert.className = `alert ${type}`;
+            alert.textContent = `${emoji} ${message}`;
+            
             container.appendChild(alert);
             setTimeout(() => {
                 alert.style.display = 'block';
