@@ -61,10 +61,15 @@ function connectToTikTokLive(username, ws) {
         }).catch(err => {
             console.error('Failed to connect to TikTok Live:', err);
             // Send error message to the client, including the specific error message
+            let errorMessage = `Failed to connect to TikTok user "${username}". Please check the username.`;
+            if (err.message) {
+                 errorMessage += ` Error: ${err.message}`;
+            }
+
             ws.send(JSON.stringify({
                 type: 'error',
                 data: {
-                    message: `Failed to connect to TikTok user "${username}". Please check the username. Error: ${err.message}`
+                    message: errorMessage
                 }
             }));
         });
