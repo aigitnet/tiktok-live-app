@@ -107,7 +107,7 @@
             const username = document.getElementById('tiktok-username').value;
             if (username) {
                 // Connect to the WebSocket server on Render
-                const ws = new WebSocket('wss://tiktok-live-app.onrender.com/websocket');
+                const ws = new WebSocket('wss://tiktok-live-app.onrender.com');
 
                 ws.onopen = () => {
                     console.log('Connected to WebSocket server');
