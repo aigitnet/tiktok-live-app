@@ -48,7 +48,8 @@ function connectToTikTokLive(username, ws) {
     try {
         connection = new WebcastPushConnection(username, {
             processInitialData: false,
-            // Configure the proxy if needed (e.g., for region access)
+            // You may need to use a proxy if you're experiencing regional restrictions.
+            // Example:
             // requestOptions: {
             //     proxy: 'http://your-proxy-url.com'
             // }
@@ -59,7 +60,7 @@ function connectToTikTokLive(username, ws) {
             console.info(`Connected to roomId ${state.roomId}`);
         }).catch(err => {
             console.error('Failed to connect to TikTok Live:', err);
-            // Send error message to the client
+            // Send error message to the client, including the specific error message
             ws.send(JSON.stringify({
                 type: 'error',
                 data: {
