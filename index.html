@@ -3,83 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Live Event Viewer</title>
+    <title>TikTok Live Alerts</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f2f5;
+            background-color: #1a1a2e;
+            color: white;
+            font-family: 'Inter', sans-serif;
         }
 
         .container {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            width: 90%;
-            max-width: 500px;
+            max-width: 90%;
+            margin: auto;
+            padding: 2rem 1rem;
         }
 
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 1rem;
-        }
-
-        #username-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        #tiktok-username {
-            padding: 0.75rem;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 1rem;
-        }
-
-        #connect-button {
-            padding: 0.75rem;
-            border: none;
-            border-radius: 5px;
-            background-color: #fe2c55;
-            color: white;
-            font-size: 1rem;
+        /* Tabs and buttons */
+        .tab-button {
+            transition: all 0.3s ease;
             cursor: pointer;
-            transition: background-color 0.3s;
+            border-bottom: 2px solid transparent;
         }
 
-        #connect-button:hover {
-            background-color: #e61d4b;
+        .tab-button.active {
+            border-bottom-color: #fe2c55;
+            color: #fe2c55;
         }
 
-        .alert-container {
-            margin-top: 1rem;
-        }
-
-        .alert {
-            color: white;
-            padding: 1rem;
-            margin-bottom: 0.5rem;
-            border-radius: 5px;
-            display: none;
-            animation: fadeIn 0.5s ease-out forwards;
+        /* Custom alert animation */
+        .alert-container .alert {
+            animation: slideInFromTop 0.5s ease-out forwards;
         }
         
-        .alert.follow { background-color: #4CAF50; } /* Green for follow */
-        .alert.share { background-color: #2196F3; } /* Blue for share */
-        .alert.gift { background-color: #FF9800; } /* Orange for gift */
-        .alert.chat { background-color: #9E9E9E; } /* Gray for chat */
-        .alert.error { background-color: #F44336; } /* Red for error */
-
-        @keyframes fadeIn {
+        @keyframes slideInFromTop {
             from {
                 opacity: 0;
                 transform: translateY(-20px);
@@ -91,17 +48,72 @@
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>TikTok Live Event Viewer</h1>
-        <form id="username-form">
-            <input type="text" id="tiktok-username" placeholder="Enter TikTok Username">
-            <button type="submit" id="connect-button">Connect</button>
-        </form>
-        <div class="alert-container" id="alert-container"></div>
+<body class="flex flex-col items-center min-h-screen">
+    <div class="container bg-gray-800 rounded-2xl shadow-xl mt-8 p-6 md:p-10">
+        <h1 class="text-3xl font-bold text-center mb-4">TikTok Live Alerts</h1>
+        <p class="text-sm text-center text-gray-400 mb-6">Connect to a TikTok Live stream and get real-time alerts for follows, shares, and gifts.</p>
+        
+        <!-- Connection Form -->
+        <div class="mb-8">
+            <h2 class="text-lg font-semibold mb-2 text-center text-gray-300">Enter TikTok Username</h2>
+            <form id="username-form" class="flex flex-col sm:flex-row gap-3">
+                <input type="text" id="tiktok-username" placeholder="e.g., username123" class="flex-grow p-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
+                <button type="submit" id="connect-button" class="p-3 bg-pink-600 text-white font-bold rounded-lg hover:bg-pink-700 transition-colors shadow-md">Connect</button>
+            </form>
+        </div>
+
+        <!-- Alerts Container -->
+        <div id="alert-container" class="space-y-3">
+            <!-- Alerts will be dynamically added here -->
+        </div>
+
+        <!-- Main Content Section (Tabs) -->
+        <div class="mt-8">
+            <!-- Tab buttons -->
+            <div class="flex justify-center border-b border-gray-700 mb-6">
+                <button id="sound-tts-tab" class="tab-button active text-lg px-4 py-2 mr-4">
+                    <i class="fas fa-volume-up"></i> Sound & TTS
+                </button>
+                <button id="widget-tab" class="tab-button text-lg px-4 py-2">
+                    <i class="fas fa-cube"></i> Widget Gallery
+                </button>
+            </div>
+            
+            <!-- Tab Content -->
+            <div id="sound-tts-content" class="tab-content">
+                <!-- Sound Alerts Section -->
+                <div class="bg-gray-700 p-4 rounded-lg shadow-inner mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-md font-semibold text-gray-300"><i class="fas fa-bell mr-2 text-yellow-400"></i>Sound Alerts</h3>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-500 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
+                        </label>
+                    </div>
+                    <p class="text-sm text-gray-400">Play sounds for new followers, gifts, and more. </p>
+                    <a href="#" class="text-blue-400 hover:text-blue-300 text-sm mt-2 block">Edit Sound Alerts →</a>
+                </div>
+                
+                <!-- Text-to-Speech Section -->
+                <div class="bg-gray-700 p-4 rounded-lg shadow-inner">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-md font-semibold text-gray-300"><i class="fas fa-comments mr-2 text-green-400"></i>Text-to-Speech</h3>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-500 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
+                        </label>
+                    </div>
+                    <p class="text-sm text-gray-400">Let an AI voice read out chat messages in real-time. </p>
+                    <a href="#" class="text-blue-400 hover:text-blue-300 text-sm mt-2 block">Edit Text-to-Speech →</a>
+                </div>
+            </div>
+
+            <div id="widget-content" class="tab-content hidden">
+                <p class="text-center text-gray-400">Widget Gallery content will go here.</p>
+            </div>
+        </div>
     </div>
 
-    
     <script>
         document.getElementById('username-form').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -139,25 +151,30 @@
             
             // Add a class based on the event type for different styling
             let emoji = '';
+            let bgColor = '';
             if (type === 'follow') {
-                emoji = '🎉';
+                emoji = '�';
+                bgColor = 'bg-green-500';
             } else if (type === 'share') {
                 emoji = '🔗';
+                bgColor = 'bg-blue-500';
             } else if (type === 'gift') {
                 emoji = '🎁';
+                bgColor = 'bg-orange-500';
             } else if (type === 'chat') {
                 emoji = '💬';
+                bgColor = 'bg-gray-500';
             } else if (type === 'error') {
                 emoji = '⚠️';
+                bgColor = 'bg-red-500';
             }
 
-            alert.className = `alert ${type}`;
+            alert.className = `alert p-4 rounded-lg shadow-lg text-white ${bgColor}`;
             alert.textContent = `${emoji} ${message}`;
             
-            container.appendChild(alert);
-            setTimeout(() => {
-                alert.style.display = 'block';
-            }, 100);
+            container.prepend(alert); // Add to the top of the list
+            
+            // Remove the alert after 5 seconds
             setTimeout(() => {
                 alert.style.opacity = '0';
                 setTimeout(() => {
@@ -165,6 +182,27 @@
                 }, 500);
             }, 5000);
         }
+
+        // Tab functionality
+        const soundTtsTab = document.getElementById('sound-tts-tab');
+        const widgetTab = document.getElementById('widget-tab');
+        const soundTtsContent = document.getElementById('sound-tts-content');
+        const widgetContent = document.getElementById('widget-content');
+
+        soundTtsTab.addEventListener('click', () => {
+            soundTtsTab.classList.add('active');
+            widgetTab.classList.remove('active');
+            soundTtsContent.classList.remove('hidden');
+            widgetContent.classList.add('hidden');
+        });
+
+        widgetTab.addEventListener('click', () => {
+            widgetTab.classList.add('active');
+            soundTtsTab.classList.remove('active');
+            widgetContent.classList.remove('hidden');
+            soundTtsContent.classList.add('hidden');
+        });
     </script>
 </body>
 </html>
+�
