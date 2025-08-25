@@ -1,0 +1,17 @@
+{
+  "name": "tiktok-live-backend",
+  "version": "1.0.0",
+  "description": "A backend server for connecting to TikTok Live and handling events.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.18.0",
+    "tiktok-live-connector": "^1.2.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
