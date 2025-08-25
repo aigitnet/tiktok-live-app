@@ -116,7 +116,7 @@ function connectToTikTokLive(username, ws) {
         ws.send(JSON.stringify({
             type: 'error',
             data: {
-                message: `An internal error occurred.`
+                message: `An internal error occurred. Error: ${err.message}`
             }
         }));
     }
