@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live TikTok Alerts</title>
+    <!-- Use Tailwind CSS for modern, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for layout and animations */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+        }
+        
+        /* Specific animations for alert boxes */
+        .alert-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .alert-fade-out {
+            animation: fadeOut 1s ease-in forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+
+        /* Fixed alert container to overlay the rest of the content */
+        #alert-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 400px;
+            pointer-events: none; /* Allow clicks to pass through */
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center min-h-screen p-4">
+
+    <!-- Main Header & Status Section -->
+    <div class="w-full max-w-xl p-6 rounded-3xl bg-gray-900 border border-gray-700 shadow-md mb-5 text-center">
+        <h1 class="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-500">
+            Live TikTok Alerts
+        </h1>
+        <p class="text-sm text-gray-400 mb-4">
+            Connect to your live stream and customize your alerts
+        </p>
+        <div class="flex items-center justify-center p-2 rounded-xl text-sm font-semibold text-white">
+            <span id="status-light" class="w-3 h-3 rounded-full mr-2 bg-gray-400"></span>
+            <span id="status-text">Connecting...</span>
+        </div>
+    </div>
+
+    <!-- Username Input Section -->
+    <div class="w-full max-w-xl p-6 rounded-3xl bg-gray-900 border border-gray-700 shadow-md mb-5">
+        <h2 class="text-xl font-bold text-white mb-4 text-center">TikTok Username</h2>
+        <input
+            id="username-input"
+            type="text"
+            class="h-12 w-full border border-gray-600 rounded-xl px-4 text-white bg-gray-800 mb-4 focus:outline-none focus:ring-2 focus:ring-pink-500"
+            placeholder="Enter your TikTok username (e.g., my_username)"
+        />
+        <button
+            id="save-button"
+            class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-xl transition-colors"
+        >
+            Save Username
+        </button>
+    </div>
+
+    <!-- Alert Customization Section -->
+    <div class="w-full max-w-xl p-6 rounded-3xl bg-gray-900 border border-gray-700 shadow-md mb-5">
+        <h2 class="text-xl font-bold text-white mb-4 text-center">Custom Alerts</h2>
+        
+        <div class="flex justify-between items-center py-3 border-b border-gray-700">
+            <span class="text-white font-semibold">Followers</span>
+            <button class="bg-gray-700 hover:bg-gray-600 text-white text-sm py-2 px-3 rounded-md transition-colors">
+                Select Sound/Meme
+            </button>
+        </div>
+
+        <div class="flex justify-between items-center py-3 border-b border-gray-700">
+            <span class="text-white font-semibold">Shares</span>
+            <button class="bg-gray-700 hover:bg-gray-600 text-white text-sm py-2 px-3 rounded-md transition-colors">
+                Select Sound/Meme
+            </button>
+        </div>
+
+        <div class="flex justify-between items-center py-3 border-b border-gray-700">
+            <span class="text-white font-semibold">Gifts (General)</span>
+            <button class="bg-gray-700 hover:bg-gray-600 text-white text-sm py-2 px-3 rounded-md transition-colors">
+                Select Sound/Meme
+            </button>
+        </div>
+        
+        <div class="flex justify-between items-center py-3">
+            <span class="text-white font-semibold">Specific Gifts</span>
+            <button class="bg-gray-700 hover:bg-gray-600 text-white text-sm py-2 px-3 rounded-md transition-colors">
+                Configure Gifts
+            </button>
+        </div>
+    </div>
+
+    <!-- Alert display area -->
+    <div id="alert-container"></div>
+
+    <!-- JavaScript for app logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const statusLight = document.getElementById('status-light');
+            const statusText = document.getElementById('status-text');
+            const usernameInput = document.getElementById('username-input');
+            const saveButton = document.getElementById('save-button');
+            const alertContainer = document.getElementById('alert-container');
+
+            // --- WebSocket Connection ---
+            // IMPORTANT: Replace 'your-hosted-server-url.com' with the actual public URL
+            // of your cloud-hosted Node.js server. Use 'wss://' for secure connections.
+            const ws = new WebSocket('wss://your-hosted-server-url.com:8080');
+
+            ws.onopen = () => {
+                console.log('WebSocket connection established.');
+                statusLight.className = 'w-3 h-3 rounded-full mr-2 bg-green-500';
+                statusText.textContent = 'Connected!';
+            };
+
+            ws.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+                console.log('Received message:', message);
+                showAlert(message.data.message, message.type);
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket connection closed.');
+                statusLight.className = 'w-3 h-3 rounded-full mr-2 bg-red-500';
+                statusText.textContent = 'Disconnected';
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                statusLight.className = 'w-3 h-3 rounded-full mr-2 bg-yellow-500';
+                statusText.textContent = 'Error';
+            };
+
+            // --- UI Logic ---
+            
+            // Function to show a dynamic alert box
+            function showAlert(message, type) {
+                const alertBox = document.createElement('div');
+                const colorClass = getAlertColorClass(type);
+                
+                alertBox.className = `p-4 rounded-xl bg-gray-900 border-2 shadow-lg mb-4 alert-fade-in ${colorClass}`;
+                alertBox.innerHTML = `<p class="text-white text-lg font-bold text-center">${message}</p>`;
+
+                // Append the new alert to the container
+                alertContainer.prepend(alertBox);
+
+                // Start the fade-out animation after 3 seconds
+                setTimeout(() => {
+                    alertBox.classList.remove('alert-fade-in');
+                    alertBox.classList.add('alert-fade-out');
+                    // Remove the element from the DOM after the animation is complete
+                    setTimeout(() => alertBox.remove(), 1000);
+                }, 3000);
+            }
+
+            // Function to get the correct Tailwind color class based on alert type
+            function getAlertColorClass(alertType) {
+                switch (alertType) {
+                    case 'follow':
+                        return 'border-cyan-400';
+                    case 'share':
+                        return 'border-pink-500';
+                    case 'gift':
+                        return 'border-red-500';
+                    case 'chat':
+                        return 'border-gray-500';
+                    default:
+                        return 'border-gray-400';
+                }
+            }
+
+            // Function to save the username.
+            // In a later step, we will add the logic to send this to the backend.
+            function handleSaveUsername() {
+                const username = usernameInput.value.trim();
+                if (username) {
+                    alert(`Username "${username}" saved! The app will attempt to connect to this user.`);
+                    // TODO: Send username to WebSocket server
+                } else {
+                    alert('Please enter a TikTok username.');
+                }
+            }
+
+            // Event listener for the save button click
+            saveButton.addEventListener('click', handleSaveUsername);
+        });
+    </script>
+</body>
+</html>
