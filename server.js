@@ -55,7 +55,7 @@ function connectToTikTokLive(username, ws) {
             // }
         });
 
-        // Connect to the stream
+        // Connect to the stream and set up listeners only after a successful connection
         newConnection.connect().then(state => {
             console.info(`Connected to roomId ${state.roomId}`);
             connection = newConnection;
