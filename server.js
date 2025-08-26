@@ -46,7 +46,7 @@ wss.on('connection', ws => {
 // Function to establish a connection to a TikTok Live stream
 function connectToTikTokLive(username, ws) {
     try {
-        connection = new WebcastPushConnection(username, {
+        const newConnection = new WebcastPushConnection(username, {
             processInitialData: false,
             // You may need to use a proxy if you're experiencing regional restrictions.
             // Example:
@@ -56,8 +56,51 @@ function connectToTikTokLive(username, ws) {
         });
 
         // Connect to the stream
-        connection.connect().then(state => {
+        newConnection.connect().then(state => {
             console.info(`Connected to roomId ${state.roomId}`);
+            connection = newConnection;
+
+            // Set up listeners for different live events
+            connection.on(WebcastTSEvents.FOLLOW, data => {
+                console.log(`${data.uniqueId} followed!`);
+                // Send an alert to the connected client
+                ws.send(JSON.stringify({
+                    type: 'follow',
+                    data: {
+                        message: `${data.uniqueId} just followed!`
+                    }
+                }));
+            });
+
+            connection.on(WebcastTSEvents.SHARE, data => {
+                console.log(`${data.uniqueId} shared the live stream!`);
+                ws.send(JSON.stringify({
+                    type: 'share',
+                    data: {
+                        message: `${data.uniqueId} shared the stream!`
+                    }
+                }));
+            });
+
+            connection.on(WebcastTSEvents.GIFT, data => {
+                console.log(`${data.uniqueId} gave a gift!`);
+                ws.send(JSON.stringify({
+                    type: 'gift',
+                    data: {
+                        message: `${data.uniqueId} sent a gift: ${data.giftId} (x${data.repeatCount})`
+                    }
+                }));
+            });
+
+            connection.on(WebcastTSEvents.CHAT, data => {
+                console.log(`${data.uniqueId} said: ${data.comment}`);
+                ws.send(JSON.stringify({
+                    type: 'chat',
+                    data: {
+                        message: `${data.uniqueId} said: ${data.comment}`
+                    }
+                }));
+            });
         }).catch(err => {
             console.error('Failed to connect to TikTok Live:', err);
             // Send error message to the client, including the specific error message
@@ -70,48 +113,6 @@ function connectToTikTokLive(username, ws) {
                 type: 'error',
                 data: {
                     message: errorMessage
-                }
-            }));
-        });
-
-        // Set up listeners for different live events
-        connection.on(WebcastTSEvents.FOLLOW, data => {
-            console.log(`${data.uniqueId} followed!`);
-            // Send an alert to the connected client
-            ws.send(JSON.stringify({
-                type: 'follow',
-                data: {
-                    message: `${data.uniqueId} just followed!`
-                }
-            }));
-        });
-
-        connection.on(WebcastTSEvents.SHARE, data => {
-            console.log(`${data.uniqueId} shared the live stream!`);
-            ws.send(JSON.stringify({
-                type: 'share',
-                data: {
-                    message: `${data.uniqueId} shared the stream!`
-                }
-            }));
-        });
-
-        connection.on(WebcastTSEvents.GIFT, data => {
-            console.log(`${data.uniqueId} gave a gift!`);
-            ws.send(JSON.stringify({
-                type: 'gift',
-                data: {
-                    message: `${data.uniqueId} sent a gift: ${data.giftId} (x${data.repeatCount})`
-                }
-            }));
-        });
-
-        connection.on(WebcastTSEvents.CHAT, data => {
-            console.log(`${data.uniqueId} said: ${data.comment}`);
-            ws.send(JSON.stringify({
-                type: 'chat',
-                data: {
-                    message: `${data.uniqueId} said: ${data.comment}`
                 }
             }));
         });
