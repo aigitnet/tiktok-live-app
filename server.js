@@ -4,7 +4,7 @@
 const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
-const { WebcastTSEvents, WebcastPushConnection } = require('tiktok-live-connector');
+const { WebcastPushConnection } = require('tiktok-live-connector');
 
 // Create an Express app and an HTTP server
 const app = express();
@@ -60,8 +60,10 @@ function connectToTikTokLive(username, ws) {
             console.info(`Connected to roomId ${state.roomId}`);
             connection = newConnection;
 
-            // Set up listeners for different live events
-            connection.on(WebcastTSEvents.FOLLOW, data => {
+            // Set up listeners for different live events using string literals
+            // This is a more robust way to handle events if the WebcastTSEvents enum
+            // is not being loaded correctly.
+            connection.on('follow', data => {
                 console.log(`${data.uniqueId} followed!`);
                 // Send an alert to the connected client
                 ws.send(JSON.stringify({
@@ -72,7 +74,7 @@ function connectToTikTokLive(username, ws) {
                 }));
             });
 
-            connection.on(WebcastTSEvents.SHARE, data => {
+            connection.on('share', data => {
                 console.log(`${data.uniqueId} shared the live stream!`);
                 ws.send(JSON.stringify({
                     type: 'share',
@@ -82,7 +84,7 @@ function connectToTikTokLive(username, ws) {
                 }));
             });
 
-            connection.on(WebcastTSEvents.GIFT, data => {
+            connection.on('gift', data => {
                 console.log(`${data.uniqueId} gave a gift!`);
                 ws.send(JSON.stringify({
                     type: 'gift',
@@ -92,7 +94,7 @@ function connectToTikTokLive(username, ws) {
                 }));
             });
 
-            connection.on(WebcastTSEvents.CHAT, data => {
+            connection.on('chat', data => {
                 console.log(`${data.uniqueId} said: ${data.comment}`);
                 ws.send(JSON.stringify({
                     type: 'chat',
